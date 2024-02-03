@@ -1,10 +1,9 @@
 'use strict';
 
 const util = require('util');
-const braces = require('braces');
 const picomatch = require('picomatch');
 const utils = require('picomatch/lib/utils');
-const isEmptyString = val => val === '' || val === './';
+const isEmptyString = (val) => val === '' || val === './';
 
 /**
  * Returns an array of strings that match one or more glob patterns.
@@ -33,7 +32,7 @@ const micromatch = (list, patterns, options) => {
   let items = new Set();
   let negatives = 0;
 
-  let onResult = state => {
+  let onResult = (state) => {
     items.add(state.output);
     if (options && options.onResult) {
       options.onResult(state);
@@ -41,7 +40,11 @@ const micromatch = (list, patterns, options) => {
   };
 
   for (let i = 0; i < patterns.length; i++) {
-    let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
+    let isMatch = picomatch(
+      String(patterns[i]),
+      { ...options, onResult },
+      true
+    );
     let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
     if (negated) negatives++;
 
@@ -61,7 +64,7 @@ const micromatch = (list, patterns, options) => {
   }
 
   let result = negatives === patterns.length ? [...items] : [...keep];
-  let matches = result.filter(item => !omit.has(item));
+  let matches = result.filter((item) => !omit.has(item));
 
   if (options && matches.length === 0) {
     if (options.failglob === true) {
@@ -69,7 +72,9 @@ const micromatch = (list, patterns, options) => {
     }
 
     if (options.nonull === true || options.nullglob === true) {
-      return options.unescape ? patterns.map(p => p.replace(/\\/g, '')) : patterns;
+      return options.unescape
+        ? patterns.map((p) => p.replace(/\\/g, ''))
+        : patterns;
     }
   }
 
@@ -120,7 +125,8 @@ micromatch.matcher = (pattern, options) => picomatch(pattern, options);
  * @api public
  */
 
-micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+micromatch.isMatch = (str, patterns, options) =>
+  picomatch(patterns, options)(str);
 
 /**
  * Backwards compatibility
@@ -150,7 +156,7 @@ micromatch.not = (list, patterns, options = {}) => {
   let result = new Set();
   let items = [];
 
-  let onResult = state => {
+  let onResult = (state) => {
     if (options.onResult) options.onResult(state);
     items.push(state.output);
   };
@@ -191,7 +197,7 @@ micromatch.contains = (str, pattern, options) => {
   }
 
   if (Array.isArray(pattern)) {
-    return pattern.some(p => micromatch.contains(str, p, options));
+    return pattern.some((p) => micromatch.contains(str, p, options));
   }
 
   if (typeof pattern === 'string') {
@@ -199,7 +205,10 @@ micromatch.contains = (str, pattern, options) => {
       return false;
     }
 
-    if (str.includes(pattern) || (str.startsWith('./') && str.slice(2).includes(pattern))) {
+    if (
+      str.includes(pattern) ||
+      (str.startsWith('./') && str.slice(2).includes(pattern))
+    ) {
       return true;
     }
   }
@@ -261,7 +270,7 @@ micromatch.some = (list, patterns, options) => {
 
   for (let pattern of [].concat(patterns)) {
     let isMatch = picomatch(String(pattern), options);
-    if (items.some(item => isMatch(item))) {
+    if (items.some((item) => isMatch(item))) {
       return true;
     }
   }
@@ -297,7 +306,7 @@ micromatch.every = (list, patterns, options) => {
 
   for (let pattern of [].concat(patterns)) {
     let isMatch = picomatch(String(pattern), options);
-    if (!items.every(item => isMatch(item))) {
+    if (!items.every((item) => isMatch(item))) {
       return false;
     }
   }
@@ -336,7 +345,7 @@ micromatch.all = (str, patterns, options) => {
     throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
   }
 
-  return [].concat(patterns).every(p => picomatch(p, options)(str));
+  return [].concat(patterns).every((p) => picomatch(p, options)(str));
 };
 
 /**
@@ -364,7 +373,7 @@ micromatch.capture = (glob, input, options) => {
   let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
 
   if (match) {
-    return match.slice(1).map(v => v === void 0 ? '' : v);
+    return match.slice(1).map((v) => (v === void 0 ? '' : v));
   }
 };
 
@@ -416,15 +425,15 @@ micromatch.scan = (...args) => picomatch.scan(...args);
  * @api public
  */
 
-micromatch.parse = (patterns, options) => {
-  let res = [];
-  for (let pattern of [].concat(patterns || [])) {
-    for (let str of braces(String(pattern), options)) {
-      res.push(picomatch.parse(str, options));
-    }
-  }
-  return res;
-};
+// micromatch.parse = (patterns, options) => {
+//   let res = [];
+//   for (let pattern of [].concat(patterns || [])) {
+//     for (let str of braces(String(pattern), options)) {
+//       res.push(picomatch.parse(str, options));
+//     }
+//   }
+//   return res;
+// };
 
 /**
  * Process the given brace `pattern`.
@@ -448,7 +457,7 @@ micromatch.braces = (pattern, options) => {
   if ((options && options.nobrace === true) || !/\{.*\}/.test(pattern)) {
     return [pattern];
   }
-  return braces(pattern, options);
+  return;
 };
 
 /**
@@ -457,7 +466,7 @@ micromatch.braces = (pattern, options) => {
 
 micromatch.braceExpand = (pattern, options) => {
   if (typeof pattern !== 'string') throw new TypeError('Expected a string');
-  return micromatch.braces(pattern, { ...options, expand: true });
+  return [];
 };
 
 /**
